@@ -4,9 +4,13 @@
 
 ## 安装
 
+同一个 Git 仓库提供两部分：酒馆界面里的协议选择器，以及服务端的协议转换插件。酒馆自带的「安装扩展」只会安装选择器。
+
 1. 在酒馆根目录执行 `node plugins.js install <插件仓库 Git URL>`，或把插件目录放入酒馆的 `plugins/`。
-2. 进入装好的插件目录，执行 `node index.cjs --install-ui`。更新插件后也执行一次此命令。
-3. 在酒馆 `config.yaml` 中设置 `enableServerPlugins: true`，重启酒馆并刷新网页。无需安装额外依赖。
+2. 在酒馆 `config.yaml` 中设置 `enableServerPlugins: true`，重启酒馆。无需安装额外依赖。
+3. 在酒馆打开「扩展 → 安装扩展」，粘贴同一个 Git URL。刷新网页后，扩展管理器里会显示 **Native Bridge Protocol Selector**。私有仓库需要酒馆所在机器上的 Git 凭据有读取权限。
+
+如果已经用 `node index.cjs --install-ui` 安装了选择器，前端已经可用，不需要再装一份。该命令也可以替代第 3 步。界面的扩展更新只更新选择器；服务端可在酒馆根目录用 `node plugins.js update` 更新，更新后重启酒馆。
 
 ## 使用
 
