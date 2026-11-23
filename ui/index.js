@@ -35,6 +35,8 @@ import { jsonResponse, nativeJson, nativeRequest, nativeStream } from './native.
     form.prepend(row);
 
     const storageKey = 'st-native-bridge-protocol';
+    // Older versions only supported server-plugin auth. Do not inherit that selection on upgrade.
+    const authStorageKey = `${storageKey}-auth-v2`;
     let protocol = 'openai';
     try {
         const saved = localStorage.getItem(storageKey);
@@ -61,7 +63,7 @@ import { jsonResponse, nativeJson, nativeRequest, nativeStream } from './native.
         }
         auth.value = 'native';
         try {
-            const saved = localStorage.getItem(`${storageKey}-${protocol}-auth`);
+            const saved = localStorage.getItem(`${authStorageKey}-${protocol}`);
             if (authOptions[protocol].some(([value]) => saved === value)) auth.value = saved;
         } catch { /* Default authentication. */ }
         renderKey();
@@ -75,7 +77,7 @@ import { jsonResponse, nativeJson, nativeRequest, nativeStream } from './native.
     auth.addEventListener('change', () => {
         keyField.value = '';
         renderKey();
-        try { localStorage.setItem(`${storageKey}-${protocol}-auth`, auth.value); } catch { /* Page only. */ }
+        try { localStorage.setItem(`${authStorageKey}-${protocol}`, auth.value); } catch { /* Page only. */ }
     });
     let keyUrl = '';
     keyField.addEventListener('input', () => { keyUrl = urlField.value.trim(); });
@@ -117,7 +119,7 @@ import { jsonResponse, nativeJson, nativeRequest, nativeStream } from './native.
             body: JSON.stringify({ ...body, native_bridge_protocol: protocol, native_bridge_auth: auth.value }),
         }).then(response => {
             if (response.status !== 404 || response.headers.get('content-type')?.includes('application/json')) return response;
-            return new Response(JSON.stringify({ error: { message: 'Native Bridge 服务端未加载。请安装服务端插件、启用 enableServerPlugins 并重启酒馆。' } }), {
+            return new Response(JSON.stringify({ error: { message: '当前选的是服务端插件模式，但服务端未加载。只安装了扩展时，请在认证下拉框选「免服务端安装」，并填写该模式的渠道 Key。' } }), {
                 status: 503, headers: { 'Content-Type': 'application/json' },
             });
         });
