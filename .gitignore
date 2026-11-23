@@ -1,0 +1,10 @@
+*
+!/.gitignore
+!/README.md
+!/package.json
+!/index.cjs
+!/protocol.cjs
+!/bridge.test.cjs
+!/ui/
+!/ui/manifest.json
+!/ui/index.js

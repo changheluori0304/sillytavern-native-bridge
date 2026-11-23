@@ -1,0 +1,8 @@
+{
+  "display_name": "Native Bridge Protocol Selector",
+  "loading_order": 10,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "version": "2.0.0"
+}
