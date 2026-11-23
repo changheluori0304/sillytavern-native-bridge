@@ -9,6 +9,26 @@ const { createHandler } = require('./index.cjs');
 const fakeKey = 'temporary-test-provider-key';
 const model = 'custom-model[测试]';
 
+test('extension-only adapter uses native source, normalized URL and native credential format', async () => {
+    const { nativeRequest, nativeJson, nativeStream } = await import('./ui/native.mjs');
+    const gemini = nativeRequest({ custom_url: 'https://example.invalid/relay/v1beta/models/old:generateContent', model }, 'gemini', 'test&key');
+    assert.equal(gemini.chat_completion_source, 'makersuite');
+    assert.equal(gemini.reverse_proxy, 'https://example.invalid/relay');
+    assert.equal(gemini.proxy_password, 'test%26key');
+    assert.equal(gemini.model, encodeURIComponent(model));
+    const claude = nativeRequest({ custom_url: 'https://example.invalid/relay/v1/messages', model }, 'claude', 'test-key');
+    assert.equal(claude.chat_completion_source, 'claude');
+    assert.equal(claude.reverse_proxy, 'https://example.invalid/relay/v1');
+    assert.equal(claude.model, model);
+    const plain = nativeJson({ choices: [{ message: { content: '' } }], content: [{ type: 'text', text: 'reply' }] }, 'claude');
+    assert.equal((await plain.json()).choices[0].message.content, 'reply');
+    const parser = new TransformStream({ transform(_chunk, controller) {
+        controller.enqueue({ data: JSON.stringify({ candidates: [{ content: { parts: [{ text: '思考', thought: true }, { text: '回答' }] } }] }) });
+    } });
+    const converted = nativeStream(new Response('fixture'), 'gemini', parser);
+    assert.match(await converted.text(), /"reasoning_content":"思考","content":"回答".*\n\ndata: \[DONE\]/);
+});
+
 async function listen(t, server) {
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
@@ -106,7 +126,9 @@ test('Claude and Gemini: native requests, JSON and incrementally translated SSE'
                 signal: AbortSignal.timeout(3000),
             });
             assert.equal((await send({}, 'status', false)).status, 401);
-            assert.deepEqual(await (await send({}, 'status')).json(), { bypass: true });
+            assert.deepEqual(await (await send({}, 'status')).json(), { bypass: true, data: [] });
+            assert.deepEqual(await (await send({ model }, 'status')).json(), { bypass: true, data: [{ id: model, object: 'model' }] });
+            assert.equal(requests.length, 0, 'Status must not call upstream for the model list');
             const plain = await send(input);
             assert.equal(plain.status, 200);
             const { choices: [choice], usage } = await plain.json();

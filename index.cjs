@@ -104,7 +104,10 @@ function createHandler(getKey, statusOnly = false) {
         } catch (err) {
             return json(res, 400, errorData(err.message, 'invalid_request_error'));
         }
-        if (statusOnly) return json(res, 200, { bypass: true });
+        if (statusOnly) {
+            const model = typeof req.body.model === 'string' ? req.body.model.trim() : '';
+            return json(res, 200, { bypass: true, data: model ? [{ id: model, object: 'model' }] : [] });
+        }
         const { provider } = entry;
 
         const controller = new AbortController();
@@ -169,7 +172,7 @@ if (require.main === module) {
             }
             fs.mkdirSync(extensions, { recursive: true });
             fs.mkdirSync(destination, { recursive: true });
-            for (const file of ['manifest.json', 'index.js']) fs.copyFileSync(path.join(__dirname, 'ui', file), path.join(destination, file));
+            for (const file of ['manifest.json', 'index.js', 'native.mjs']) fs.copyFileSync(path.join(__dirname, 'ui', file), path.join(destination, file));
             console.log('Installed protocol selector. Reload SillyTavern in your browser.');
         } catch (error) {
             console.error(error.message);
