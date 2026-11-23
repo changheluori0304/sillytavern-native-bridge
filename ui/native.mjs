@@ -14,8 +14,8 @@ export function nativeRequest(body, protocol, key) {
     if (claude) {
         url.pathname = (path.replace(/\/v1(?:\/messages)?$/, '') || '') + '/v1';
     } else {
-        url.pathname = path.replace(/\/v1beta(?:\/models(?:\/[^/]+:(?:streamGenerateContent|generateContent))?)?$/, '') || '/';
-        if (/\/v1(?:alpha)?(?:\/models(?:\/.*)?)?$/.test(path)) throw new Error('免服务端 Gemini 模式使用酒馆默认的 v1beta 接口。');
+        // SillyTavern appends its configured Gemini version and model path.
+        url.pathname = path.replace(/\/v1(?:beta|alpha)?(?:\/models(?:\/[^/]+:(?:streamGenerateContent|generateContent))?)?$/, '') || '/';
     }
     return {
         ...body,

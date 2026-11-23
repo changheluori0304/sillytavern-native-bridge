@@ -16,6 +16,10 @@ test('extension-only adapter uses native source, normalized URL and native crede
     assert.equal(gemini.reverse_proxy, 'https://example.invalid/relay');
     assert.equal(gemini.proxy_password, 'test%26key');
     assert.equal(gemini.model, encodeURIComponent(model));
+    for (const suffix of ['/v1', '/v1/', '/v1beta/models', '/v1/models/old:streamGenerateContent', '/v1alpha']) {
+        const req = nativeRequest({ custom_url: `https://example.invalid/relay${suffix}`, model }, 'gemini', 'test-key');
+        assert.equal(req.reverse_proxy, 'https://example.invalid/relay');
+    }
     const claude = nativeRequest({ custom_url: 'https://example.invalid/relay/v1/messages', model }, 'claude', 'test-key');
     assert.equal(claude.chat_completion_source, 'claude');
     assert.equal(claude.reverse_proxy, 'https://example.invalid/relay/v1');

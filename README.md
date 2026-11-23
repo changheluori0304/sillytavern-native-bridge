@@ -8,7 +8,7 @@
 2. 在「API 连接 → 聊天补全 → 自定义」填写渠道 URL 和模型 ID，选择 Gemini 或 Claude 兼容，并选「免服务端安装」。
 3. 在新增的「原生模式渠道 Key」栏填 Key，发一条消息测试。Key 只保留在当前页面，刷新后要重新填；模型 ID 仍由酒馆保存，无需拉取列表。
 
-此模式调用酒馆已有接口：Gemini 使用 `v1beta` 和 `key` 查询参数（酒馆如有自定义 Gemini 版本，以该设置为准）；Claude 使用 `v1/messages` 和 `x-api-key`。如果渠道要求 Bearer 或 Gemini 的 `x-goog-api-key`，请使用下方的服务端插件模式。私有仓库需要酒馆所在机器上的 Git 凭据有读取权限。
+此模式调用酒馆已有接口：Gemini 会识别并去掉地址末尾的 `/v1`、`/v1beta` 或 `/v1alpha`（也支持完整生成路径），保留网关前缀，再由酒馆补全它配置的 Gemini 版本和模型路径（默认 `v1beta`），使用 `key` 查询参数。Claude 使用 `v1/messages` 和 `x-api-key`。如果渠道只接受其他版本、Bearer 或 Gemini 的 `x-goog-api-key`，请使用下方的服务端插件模式。私有仓库需要酒馆所在机器上的 Git 凭据有读取权限。
 
 ## 可选：服务端插件模式
 
